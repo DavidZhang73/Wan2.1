@@ -64,4 +64,13 @@ profile = "black"
 [tool.mypy]
 strict = true
 
-
+# https://docs.astral.sh/ruff/configuration/
+[tool.ruff]
+line-length = 88
+select = [
+    "F",  # pyflakes
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "UP", # pyupgrade
+]
+ignore = ["F401"]
