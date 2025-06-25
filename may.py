@@ -33,6 +33,9 @@ class MayTask(Task):
         self.app = celery.Celery("ProjectMay", broker=self._broker_url)
         self.app.conf.worker_hijack_root_logger = False
         self.app.conf.worker_redirect_stdouts = False
+        self.app.conf.broker_heartbeat = 600
+        self.app.conf.broker_heartbeat_checkrate = 10
+        self.app.conf.task_reject_on_worker_lost = True
         self.name = f"{self.MAIN_NAME}.{self._task['id']}"
         self.app.conf.task_queues = (Queue(self.name, routing_key=self.name),)
         super().__init__()
@@ -94,7 +97,6 @@ class MayTask(Task):
             f"--hostname={self.name}@%h({uuid.uuid4()})",
             "--concurrency=1",
             "--prefetch-multiplier=1",
-            "--loglevel=INFO",
             "--pool=solo",
         ]
         for arg in cli_args:
@@ -105,7 +107,7 @@ class MayTask(Task):
         if not hasattr(self.request, "headers"):
             self.request.headers = {}
         self.request.headers["start_time"] = time.time()
-        return super().before_start(task_id, args, kwargs)
+        super().before_start(task_id, args, kwargs)
 
     def run(self, payload: dict):
         raise NotImplementedError()
